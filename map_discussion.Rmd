@@ -32,11 +32,9 @@ At least three data types:
 library(lingtypology)
 library(tidyverse)
 library(leaflet)
-
-map.feature(ejective_and_n_consonants$language,
-            features = ejective_and_n_consonants$ejectives,
-            label = ejective_and_n_consonants$language)
-
+library(leaflet.minicharts)
+library(sf)
+library(glue)
 ```
 
 
@@ -51,7 +49,6 @@ map.feature(languages = wals_85A_scandinavia$language,
               shape = c("➡", "⬅"))
 
 ```
-
 
 ## Extends to linguistic area maps
 
@@ -80,8 +77,6 @@ map.feature(languages = kpv$language,
 ![](https://imgur.com/uv5WvOk.png)
 
 ```{r}
-
-library(sf)
 
 sfc_as_cols <- function(x, names = c("longitude","latitude")) {
   stopifnot(inherits(x,"sf") && inherits(sf::st_geometry(x),"sfc_POINT"))
@@ -157,6 +152,10 @@ Features used in my variants of Finnic dialect maps:
 - longitude
 - latitude
 
+```{r}
+names(kettunen_names)
+```
+
 
 ## Using dialect corpus
 
@@ -181,8 +180,6 @@ skn_kanssa <- skn %>% mutate(id = as.numeric(id)) %>%
   mutate(freq_adpos = n() / count_adpos) %>%
   ungroup() %>%
   distinct(paikka, lat, lon, freq_adpos, type)
-
-library(glue)
 
 skn_kanssa_hits <- skn %>% mutate(id = as.numeric(id)) %>%
   arrange(id, position) %>%
@@ -227,9 +224,6 @@ head(skn %>% arrange(position) %>% slice(1:10))
 
 
 ```{r}
-
-library(leaflet)
-library(leaflet.minicharts)
 
 leaflet() %>%
   leaflet::addTiles() %>%
