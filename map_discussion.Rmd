@@ -181,19 +181,11 @@ skn_kanssa <- skn %>% mutate(id = as.numeric(id)) %>%
   ungroup() %>%
   distinct(paikka, lat, lon, freq_adpos, type)
 
-skn_kanssa_hits <- skn %>% mutate(id = as.numeric(id)) %>%
-  arrange(id, position) %>%
-  filter(rooli == "haastateltava") %>%
-  mutate(context = glue("{lag(sane)} {sane} {lead(sane)}")) %>%
-  filter(pos == "Adp") %>%
-  filter(deprel == "adpos") %>%# View
-  mutate(type = ifelse(dephead > ref, "pre", "post")) %>%
-  filter(lemma == "kanssa")
-
 skn_kanssa <- skn_kanssa %>%
   spread(type, freq_adpos) %>%
   replace(is.na(.), 0)
 
+# skn_kanssa_hits %>% slice(1) %>% pull(url) %>% browseURL()
 ```
 
 ```{r}
@@ -246,7 +238,7 @@ leaflet() %>%
 - These are almost all mistakes in the corpus annotations :(
 - Still a good research topic!
 - Data also surely useful
-- [Example](https://lat.csc.fi/ds/annex/runLoader?nodeid=MPI7648%23&time=3510338&duration=7751&tiername=AL-original)
+- [Example](https://lat.csc.fi/ds/annex/runLoader?nodeid=MPI7571%23&time=32725&duration=7529&tiername=RJ-original)
 
 ## Current situation
 

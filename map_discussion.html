@@ -5130,18 +5130,11 @@ skn_kanssa &lt;- skn %&gt;% mutate(id = as.numeric(id)) %&gt;%
   ungroup() %&gt;%
   distinct(paikka, lat, lon, freq_adpos, type)
 
-skn_kanssa_hits &lt;- skn %&gt;% mutate(id = as.numeric(id)) %&gt;%
-  arrange(id, position) %&gt;%
-  filter(rooli == &quot;haastateltava&quot;) %&gt;%
-  mutate(context = glue(&quot;{lag(sane)} {sane} {lead(sane)}&quot;)) %&gt;%
-  filter(pos == &quot;Adp&quot;) %&gt;%
-  filter(deprel == &quot;adpos&quot;) %&gt;%# View
-  mutate(type = ifelse(dephead &gt; ref, &quot;pre&quot;, &quot;post&quot;)) %&gt;%
-  filter(lemma == &quot;kanssa&quot;)
-
 skn_kanssa &lt;- skn_kanssa %&gt;%
   spread(type, freq_adpos) %&gt;%
-  replace(is.na(.), 0)</code></pre>
+  replace(is.na(.), 0)
+
+# skn_kanssa_hits %&gt;% slice(1) %&gt;% pull(url) %&gt;% browseURL()</code></pre>
 <pre class="r"><code>leaflet(skn %&gt;% distinct(paikka, lat, lon)) %&gt;%
   addTiles() %&gt;%
   addCircleMarkers()</code></pre>
@@ -5202,7 +5195,7 @@ skn_kanssa &lt;- skn_kanssa %&gt;%
 <li>These are almost all mistakes in the corpus annotations :(</li>
 <li>Still a good research topic!</li>
 <li>Data also surely useful</li>
-<li><a href="https://lat.csc.fi/ds/annex/runLoader?nodeid=MPI7648%23&amp;time=3510338&amp;duration=7751&amp;tiername=AL-original">Example</a></li>
+<li><a href="https://lat.csc.fi/ds/annex/runLoader?nodeid=MPI7571%23&amp;time=32725&amp;duration=7529&amp;tiername=RJ-original">Example</a></li>
 </ul>
 </section>
 <section id="current-situation" class="level2">
