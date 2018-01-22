@@ -1,0 +1,227 @@
+---
+title: "Harmonizing cartographic language data"
+author: "Niko Partanen"
+date: "1/22/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Notes
+
+- All data used shared by CC-BY
+    - [SKN](https://www.kotus.fi/aineistot/puhutun_kielen_aineistot/murreaanitteita/suomen_kielen_naytteita_-sarja)
+    - [Murreaineistot](https://avaa.tdata.fi/web/kotus/aineistot) by KOTUS
+
+## Data harmonization and linguistic mapping
+
+At least three data types:
+
+- Typological data (lingtypology!)
+- Dialect atlas data
+- Corpus data
+
+## Typology
+
+```{r}
+library(lingtypology)
+library(tidyverse)
+library(leaflet)
+
+uralic <- lingtypology::lang.aff("Uralic")
+wals_85A <- wals.feature("85A")
+wals_85A_scandinavia <- wals_85A %>% filter(language %in% c("Finnish", "Russian", "Swedish"))
+
+wals_85A_scandinavia <- wals_85A_scandinavia %>%
+  mutate(prepositions = case_when(`85A` == "Postpositions" ~ "-",
+                          `85A` == "Prepositions" ~ "+"))
+
+
+map.feature(languages = wals_85A_scandinavia$language,
+              features = wals_85A_scandinavia$`85A`,
+              label = wals_85A_scandinavia$language,
+              shape = c("➡", "⬅"))
+
+```
+
+## Extends to linguistic area maps
+
+```{r}
+map.feature(ejective_and_n_consonants$language,
+            features = ejective_and_n_consonants$ejectives,
+            label = ejective_and_n_consonants$language)
+
+map.feature(circassian$language, features = circassian$dialect,
+            latitude = circassian$latitude, 
+            longitude = circassian$longitude)
+```
+
+![](https://imgur.com/rkrIXGE.png)
+
+```{r}
+kpv <- read_csv("https://raw.githubusercontent.com/langdoc/kpv-geography/master/kpv.csv")
+
+map.feature(languages = kpv$language,
+            features = kpv$dialect,
+            label = kpv$village,
+            latitude = kpv$latitude,
+            longitude = kpv$longitude)
+```
+
+## Comments
+
+- Should the `village` be changed to `name` and `settlement_type`, or some equivalents?
+    - People live in cities (basically anywhere)
+    - We want to maintain only one database of place info
+- How we make sure these identifiers connect to other databases?
+    - Is this realistic to start with?
+
+## Dialect atlas
+
+![](http://kettunen.fnhost.org/pien_png/kett117.png)
+
+```{r}
+
+library(sf)
+
+sfc_as_cols <- function(x, names = c("longitude","latitude")) {
+  stopifnot(inherits(x,"sf") && inherits(sf::st_geometry(x),"sfc_POINT"))
+  ret <- sf::st_coordinates(x)
+  ret <- tibble::as_tibble(ret)
+  stopifnot(length(names) == ncol(ret))
+  x <- x[ , !names(x) %in% names]
+  ret <- setNames(ret,names)
+  dplyr::bind_cols(x,ret)
+}
+
+kettunen <- st_read('data/kettunen.shp') %>% st_transform("+proj=longlat +datum=WGS84") %>% sfc_as_cols()
+
+map_finnic <- function(data, map =  "Kartta 151"){
+
+        my_colors <-
+          c(
+            "#1f77b4",
+            "#ff7f0e",
+            "#2ca02c",
+            "#d62728",
+            "#9467bd",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+            "#17becf",
+            sample(grDevices::colors()[!grepl("ivory|azure|white|gray|grey|black|pink|1",
+                                              grDevices::colors())])
+          )
+          corpus <- data
+          current_selection <- corpus %>% filter(map_id == map)
+          pal <- colorFactor({my_colors[1:length(unique(current_selection$feature_value))]},
+                                      domain = current_selection$feature_value)
+
+          title_text <- current_selection$feature_description[1] %>% as.character()
+
+          leaflet(data = current_selection) %>%
+            addTiles() %>%
+            addCircleMarkers(color = ~pal(feature_value),
+                             radius = 4,
+                             stroke = FALSE, fillOpacity = 0.5,
+                             popup = ~feature_value) %>%
+            addLegend("bottomleft", pal = pal, values = ~feature_value,
+                      title = title_text,
+                      opacity = 1
+            )
+
+}
+
+kettunen_names <- names(kettunen)
+
+kettunen <- kettunen %>% mutate(ilmio = as.character(ilmio)) %>%
+  rename(feature_id = ilmio_id,
+                    feature_value = ilmio,
+                    feature_description = kuvaus,
+                    location = paikka_nim) %>%
+  mutate(map_id = str_extract(alaryhma_n, "^[^:]+(?=:)"))
+
+map_finnic(kettunen, "Kartta 117")
+
+```
+
+
+##
+
+Features used in my variants of Finnic dialect maps:
+
+- map_name: "Kartta 13"
+- feature_id: 
+    - feature_description
+    - feature_value
+- location
+- longitude
+- latitude
+
+
+```{r}
+skn <- read_rds("data/skn_df.rds") %>%
+  left_join(read_csv("data/skn_paikat.csv"))
+
+skn_names <- names(skn)
+
+skn_kanssa <- skn %>% mutate(id = as.numeric(id)) %>%
+  arrange(id, position) %>%
+  filter(rooli == "haastateltava") %>%
+#  mutate(context = glue("{lag(sane)} {sane} {lead(sane)}")) %>%
+  filter(pos == "Adp") %>%
+  filter(deprel == "adpos") %>%# View
+  mutate(type = ifelse(dephead > ref, "pre", "post")) %>%
+  filter(lemma == "kanssa") %>%
+  add_count(paikka) %>%
+  rename(count_adpos = n) %>%
+  group_by(paikka, type) %>%
+  mutate(freq_adpos = n() / count_adpos) %>%
+  ungroup() %>%
+  distinct(paikka, lat, lon, freq_adpos, type)
+
+library(glue)
+
+skn_kanssa_hits <- skn %>% mutate(id = as.numeric(id)) %>%
+  arrange(id, position) %>%
+  filter(rooli == "haastateltava") %>%
+  mutate(context = glue("{lag(sane)} {sane} {lead(sane)}")) %>%
+  filter(pos == "Adp") %>%
+  filter(deprel == "adpos") %>%# View
+  mutate(type = ifelse(dephead > ref, "pre", "post")) %>%
+  filter(lemma == "kanssa")
+
+skn_kanssa <- skn_kanssa %>%
+  spread(type, freq_adpos) %>%
+  replace(is.na(.), 0)
+
+library(leaflet)
+library(leaflet.minicharts)
+
+leaflet() %>%
+  leaflet::addTiles() %>%
+  addMinicharts(lng = skn_kanssa$lon,
+                lat = skn_kanssa$lat,
+                type = "pie", width = 20,
+                chartdata = skn_kanssa[, c("pre", "post")])
+
+```
+
+## Fake news!
+
+- These are almost all mistakes in the corpus annotations :(
+- Still a good research topic!
+- Data also surely useful
+- [Example](https://lat.csc.fi/ds/annex/runLoader?nodeid=MPI7648%23&time=3510338&duration=7751&tiername=AL-original)
+
+##
+
+```{r}
+kettunen_names
+skn_names
+```
+
