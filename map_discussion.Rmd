@@ -213,6 +213,8 @@ Structure here:
 - parish
 - …
 
+**Note! Some annotations automatically created! Quality is good, but this is crucial to remember.**
+
 ```{r}
 names(skn)
 ```
@@ -246,10 +248,15 @@ leaflet() %>%
 - Data also surely useful
 - [Example](https://lat.csc.fi/ds/annex/runLoader?nodeid=MPI7648%23&time=3510338&duration=7751&tiername=AL-original)
 
-##
+## Current situation
 
 ```{r}
 kettunen_names
 skn_names
 ```
 
+- Can we have more uniform ways to represent this kind of data?
+- Or connect some conventions to one another
+- There is a need for interactive workflow that it is effortless to move between different data types
+    - Conceptually similar methods to explore and visualize variables, whether we are having dialect data or corpus data with spatial metadata in our hands
+    - Preferably within R 
