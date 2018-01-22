@@ -16,6 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 - All data used shared by CC-BY
     - [SKN](https://www.kotus.fi/aineistot/puhutun_kielen_aineistot/murreaanitteita/suomen_kielen_naytteita_-sarja)
     - [Murreaineistot](https://avaa.tdata.fi/web/kotus/aineistot) by KOTUS
+- Some credits missing, some code copy-pasted from [lingtypology](https://github.com/ropensci/lingtypology)
 
 ## Data harmonization and linguistic mapping
 
@@ -35,11 +36,6 @@ library(leaflet)
 uralic <- lingtypology::lang.aff("Uralic")
 wals_85A <- wals.feature("85A")
 wals_85A_scandinavia <- wals_85A %>% filter(language %in% c("Finnish", "Russian", "Swedish"))
-
-wals_85A_scandinavia <- wals_85A_scandinavia %>%
-  mutate(prepositions = case_when(`85A` == "Postpositions" ~ "-",
-                          `85A` == "Prepositions" ~ "+"))
-
 
 map.feature(languages = wals_85A_scandinavia$language,
               features = wals_85A_scandinavia$`85A`,
@@ -82,7 +78,7 @@ map.feature(languages = kpv$language,
 
 ## Dialect atlas
 
-![](http://kettunen.fnhost.org/pien_png/kett117.png)
+![](https://imgur.com/uv5WvOk.png)
 
 ```{r}
 
@@ -150,17 +146,20 @@ map_finnic(kettunen, "Kartta 117")
 ```
 
 
-##
+## Data for these maps
 
 Features used in my variants of Finnic dialect maps:
 
-- map_name: "Kartta 13"
-- feature_id: 
-    - feature_description
-    - feature_value
+- map_name
+- feature_id 
+- feature_description
+- feature_value
 - location
 - longitude
 - latitude
+
+
+## Using dialect corpus
 
 
 ```{r}
@@ -198,6 +197,32 @@ skn_kanssa_hits <- skn %>% mutate(id = as.numeric(id)) %>%
 skn_kanssa <- skn_kanssa %>%
   spread(type, freq_adpos) %>%
   replace(is.na(.), 0)
+
+```
+
+```{r}
+
+leaflet(skn %>% distinct(paikka, lat, lon)) %>%
+  addTiles() %>%
+  addCircleMarkers()
+```
+
+Structure here:
+
+- original token
+- normalized token
+- morphological analysis
+- dependency structure
+- place name
+- parish
+- …
+
+```{r}
+names(skn)
+```
+
+
+```{r}
 
 library(leaflet)
 library(leaflet.minicharts)
