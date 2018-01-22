@@ -5122,111 +5122,7 @@ map_finnic(kettunen, &quot;Kartta 117&quot;)</code></pre>
 ##   lon = col_double()
 ## )</code></pre>
 <pre><code>## Joining, by = &quot;paikka&quot;</code></pre>
-<pre class="r"><code>skn_names &lt;- names(skn)
-
-skn_kanssa &lt;- skn %&gt;% mutate(id = as.numeric(id)) %&gt;%
-  arrange(id, position) %&gt;%
-  filter(rooli == &quot;haastateltava&quot;) %&gt;%
-#  mutate(context = glue(&quot;{lag(sane)} {sane} {lead(sane)}&quot;)) %&gt;%
-  filter(pos == &quot;Adp&quot;) %&gt;%
-  filter(deprel == &quot;adpos&quot;) %&gt;%# View
-  mutate(type = ifelse(dephead &gt; ref, &quot;pre&quot;, &quot;post&quot;)) %&gt;%
-  filter(lemma == &quot;kanssa&quot;) %&gt;%
-  add_count(paikka) %&gt;%
-  rename(count_adpos = n) %&gt;%
-  group_by(paikka, type) %&gt;%
-  mutate(freq_adpos = n() / count_adpos) %&gt;%
-  ungroup() %&gt;%
-  distinct(paikka, lat, lon, freq_adpos, type) %&gt;%
-  spread(type, freq_adpos) %&gt;%
-  replace(is.na(.), 0)
-
-# skn_kanssa_hits %&gt;% slice(1) %&gt;% pull(url) %&gt;% browseURL()</code></pre>
-<p>You end up with something like this (in this case, for different scenarios with different structures):</p>
-<pre class="r"><code>skn_kanssa %&gt;% slice(1:10) %&gt;% knitr::kable()</code></pre>
-<table>
-<thead>
-<tr class="header">
-<th style="text-align: left;">paikka</th>
-<th style="text-align: right;">lat</th>
-<th style="text-align: right;">lon</th>
-<th style="text-align: right;">post</th>
-<th style="text-align: right;">pre</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Alastaro</td>
-<td style="text-align: right;">60.95198</td>
-<td style="text-align: right;">22.86193</td>
-<td style="text-align: right;">0.8888889</td>
-<td style="text-align: right;">0.1111111</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Alatornio</td>
-<td style="text-align: right;">65.82584</td>
-<td style="text-align: right;">24.16745</td>
-<td style="text-align: right;">0.9333333</td>
-<td style="text-align: right;">0.0666667</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Artjärvi</td>
-<td style="text-align: right;">60.74365</td>
-<td style="text-align: right;">26.05508</td>
-<td style="text-align: right;">0.9230769</td>
-<td style="text-align: right;">0.0769231</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Askola</td>
-<td style="text-align: right;">60.53044</td>
-<td style="text-align: right;">25.59784</td>
-<td style="text-align: right;">0.8800000</td>
-<td style="text-align: right;">0.1200000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Eurajoki</td>
-<td style="text-align: right;">61.20236</td>
-<td style="text-align: right;">21.73398</td>
-<td style="text-align: right;">0.9696970</td>
-<td style="text-align: right;">0.0303030</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Hailuoto</td>
-<td style="text-align: right;">65.03333</td>
-<td style="text-align: right;">24.70000</td>
-<td style="text-align: right;">0.9677419</td>
-<td style="text-align: right;">0.0322581</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Heinola</td>
-<td style="text-align: right;">61.20423</td>
-<td style="text-align: right;">26.03810</td>
-<td style="text-align: right;">0.9473684</td>
-<td style="text-align: right;">0.0526316</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Hietamäki</td>
-<td style="text-align: right;">63.07211</td>
-<td style="text-align: right;">22.51892</td>
-<td style="text-align: right;">0.9565217</td>
-<td style="text-align: right;">0.0434783</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Hinnerjoki</td>
-<td style="text-align: right;">60.99986</td>
-<td style="text-align: right;">21.98383</td>
-<td style="text-align: right;">0.9777778</td>
-<td style="text-align: right;">0.0222222</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Hollola</td>
-<td style="text-align: right;">60.98870</td>
-<td style="text-align: right;">25.51632</td>
-<td style="text-align: right;">0.9444444</td>
-<td style="text-align: right;">0.0555556</td>
-</tr>
-</tbody>
-</table>
+<pre class="r"><code>skn_names &lt;- names(skn)</code></pre>
 <pre class="r"><code>leaflet(skn %&gt;% distinct(paikka, lat, lon)) %&gt;%
   addTiles() %&gt;%
   addCircleMarkers()</code></pre>
@@ -5553,6 +5449,109 @@ skn_kanssa &lt;- skn %&gt;% mutate(id = as.numeric(id)) %&gt;%
 <td style="text-align: left;">Suomussalmi, Finland</td>
 <td style="text-align: right;">64.88411</td>
 <td style="text-align: right;">28.91166</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>skn_kanssa &lt;- skn %&gt;% mutate(id = as.numeric(id)) %&gt;%
+  arrange(id, position) %&gt;%
+  filter(rooli == &quot;haastateltava&quot;) %&gt;%
+#  mutate(context = glue(&quot;{lag(sane)} {sane} {lead(sane)}&quot;)) %&gt;%
+  filter(pos == &quot;Adp&quot;) %&gt;%
+  filter(deprel == &quot;adpos&quot;) %&gt;%# View
+  mutate(type = ifelse(dephead &gt; ref, &quot;pre&quot;, &quot;post&quot;)) %&gt;%
+  filter(lemma == &quot;kanssa&quot;) %&gt;%
+  add_count(paikka) %&gt;%
+  rename(count_adpos = n) %&gt;%
+  group_by(paikka, type) %&gt;%
+  mutate(freq_adpos = n() / count_adpos) %&gt;%
+  ungroup() %&gt;%
+  distinct(paikka, lat, lon, freq_adpos, type) %&gt;%
+  spread(type, freq_adpos) %&gt;%
+  replace(is.na(.), 0)
+
+# skn_kanssa_hits %&gt;% slice(1) %&gt;% pull(url) %&gt;% browseURL()</code></pre>
+<p>You end up with something like this (in this case, for different scenarios with different structures):</p>
+<pre class="r"><code>skn_kanssa %&gt;% slice(1:10) %&gt;% knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">paikka</th>
+<th style="text-align: right;">lat</th>
+<th style="text-align: right;">lon</th>
+<th style="text-align: right;">post</th>
+<th style="text-align: right;">pre</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Alastaro</td>
+<td style="text-align: right;">60.95198</td>
+<td style="text-align: right;">22.86193</td>
+<td style="text-align: right;">0.8888889</td>
+<td style="text-align: right;">0.1111111</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Alatornio</td>
+<td style="text-align: right;">65.82584</td>
+<td style="text-align: right;">24.16745</td>
+<td style="text-align: right;">0.9333333</td>
+<td style="text-align: right;">0.0666667</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Artjärvi</td>
+<td style="text-align: right;">60.74365</td>
+<td style="text-align: right;">26.05508</td>
+<td style="text-align: right;">0.9230769</td>
+<td style="text-align: right;">0.0769231</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Askola</td>
+<td style="text-align: right;">60.53044</td>
+<td style="text-align: right;">25.59784</td>
+<td style="text-align: right;">0.8800000</td>
+<td style="text-align: right;">0.1200000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Eurajoki</td>
+<td style="text-align: right;">61.20236</td>
+<td style="text-align: right;">21.73398</td>
+<td style="text-align: right;">0.9696970</td>
+<td style="text-align: right;">0.0303030</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hailuoto</td>
+<td style="text-align: right;">65.03333</td>
+<td style="text-align: right;">24.70000</td>
+<td style="text-align: right;">0.9677419</td>
+<td style="text-align: right;">0.0322581</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Heinola</td>
+<td style="text-align: right;">61.20423</td>
+<td style="text-align: right;">26.03810</td>
+<td style="text-align: right;">0.9473684</td>
+<td style="text-align: right;">0.0526316</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hietamäki</td>
+<td style="text-align: right;">63.07211</td>
+<td style="text-align: right;">22.51892</td>
+<td style="text-align: right;">0.9565217</td>
+<td style="text-align: right;">0.0434783</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Hinnerjoki</td>
+<td style="text-align: right;">60.99986</td>
+<td style="text-align: right;">21.98383</td>
+<td style="text-align: right;">0.9777778</td>
+<td style="text-align: right;">0.0222222</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hollola</td>
+<td style="text-align: right;">60.98870</td>
+<td style="text-align: right;">25.51632</td>
+<td style="text-align: right;">0.9444444</td>
+<td style="text-align: right;">0.0555556</td>
 </tr>
 </tbody>
 </table>

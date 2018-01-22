@@ -177,33 +177,7 @@ skn <- read_rds("data/skn_df.rds") %>%
   left_join(read_csv("data/skn_paikat.csv"))
 
 skn_names <- names(skn)
-
-skn_kanssa <- skn %>% mutate(id = as.numeric(id)) %>%
-  arrange(id, position) %>%
-  filter(rooli == "haastateltava") %>%
-#  mutate(context = glue("{lag(sane)} {sane} {lead(sane)}")) %>%
-  filter(pos == "Adp") %>%
-  filter(deprel == "adpos") %>%# View
-  mutate(type = ifelse(dephead > ref, "pre", "post")) %>%
-  filter(lemma == "kanssa") %>%
-  add_count(paikka) %>%
-  rename(count_adpos = n) %>%
-  group_by(paikka, type) %>%
-  mutate(freq_adpos = n() / count_adpos) %>%
-  ungroup() %>%
-  distinct(paikka, lat, lon, freq_adpos, type) %>%
-  spread(type, freq_adpos) %>%
-  replace(is.na(.), 0)
-
-# skn_kanssa_hits %>% slice(1) %>% pull(url) %>% browseURL()
 ```
-
-You end up with something like this (in this case, for different scenarios with different structures):
-
-```{r}
-skn_kanssa %>% slice(1:10) %>% knitr::kable()
-```
-
 
 ```{r}
 
@@ -232,6 +206,32 @@ names(skn)
 skn %>% arrange(position) %>% slice(1:10) %>% knitr::kable()
 ```
 
+```{r}
+skn_kanssa <- skn %>% mutate(id = as.numeric(id)) %>%
+  arrange(id, position) %>%
+  filter(rooli == "haastateltava") %>%
+#  mutate(context = glue("{lag(sane)} {sane} {lead(sane)}")) %>%
+  filter(pos == "Adp") %>%
+  filter(deprel == "adpos") %>%# View
+  mutate(type = ifelse(dephead > ref, "pre", "post")) %>%
+  filter(lemma == "kanssa") %>%
+  add_count(paikka) %>%
+  rename(count_adpos = n) %>%
+  group_by(paikka, type) %>%
+  mutate(freq_adpos = n() / count_adpos) %>%
+  ungroup() %>%
+  distinct(paikka, lat, lon, freq_adpos, type) %>%
+  spread(type, freq_adpos) %>%
+  replace(is.na(.), 0)
+
+# skn_kanssa_hits %>% slice(1) %>% pull(url) %>% browseURL()
+```
+
+You end up with something like this (in this case, for different scenarios with different structures):
+
+```{r}
+skn_kanssa %>% slice(1:10) %>% knitr::kable()
+```
 
 
 ```{r}
