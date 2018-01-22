@@ -14,9 +14,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Notes
 
 - All data used shared by CC-BY
-    - [SKN](https://www.kotus.fi/aineistot/puhutun_kielen_aineistot/murreaanitteita/suomen_kielen_naytteita_-sarja)
+    - [SKN, Samples of Spoken Finnish](http://metashare.csc.fi/repository/browse/samples-of-spoken-finnish/642b58defccc11e18b49005056be118e3444ea5bb1dd46a5a4ca4829e93da406/)
     - [Murreaineistot](https://avaa.tdata.fi/web/kotus/aineistot) by KOTUS
 - Some credits missing, some code copy-pasted from [lingtypology](https://github.com/ropensci/lingtypology)
+- I have got my version through [Korp](https://korp.csc.fi/#?corpus=skn) API (is obviously allowed, not maybe recommended)
 
 ## Data harmonization and linguistic mapping
 
@@ -52,6 +53,15 @@ map.feature(languages = wals_85A_scandinavia$language,
 
 ## Extends to linguistic area maps
 
+```{r}
+map.feature(languages = circassian$language,
+            features = circassian$dialect,
+            label = circassian$village,
+            latitude = circassian$latitude,
+            longitude = circassian$longitude)
+```
+
+
 ![](https://imgur.com/rkrIXGE.png)
 
 ```{r}
@@ -75,6 +85,8 @@ map.feature(languages = kpv$language,
 ## Dialect atlas
 
 ![](https://imgur.com/uv5WvOk.png)
+
+Map source: [http://kettunen.fnhost.org/html/kett117.html](http://kettunen.fnhost.org/html/kett117.html)
 
 ```{r}
 
@@ -179,14 +191,19 @@ skn_kanssa <- skn %>% mutate(id = as.numeric(id)) %>%
   group_by(paikka, type) %>%
   mutate(freq_adpos = n() / count_adpos) %>%
   ungroup() %>%
-  distinct(paikka, lat, lon, freq_adpos, type)
-
-skn_kanssa <- skn_kanssa %>%
+  distinct(paikka, lat, lon, freq_adpos, type) %>%
   spread(type, freq_adpos) %>%
   replace(is.na(.), 0)
 
 # skn_kanssa_hits %>% slice(1) %>% pull(url) %>% browseURL()
 ```
+
+You end up with something like this (in this case, for different scenarios with different structures):
+
+```{r}
+skn_kanssa %>% slice(1:10) %>% knitr::kable()
+```
+
 
 ```{r}
 
@@ -212,7 +229,7 @@ names(skn)
 ```
 
 ```{r}
-head(skn %>% arrange(position) %>% slice(1:10))
+skn %>% arrange(position) %>% slice(1:10) %>% knitr::kable()
 ```
 
 
@@ -239,6 +256,18 @@ leaflet() %>%
 - Still a good research topic!
 - Data also surely useful
 - [Example](https://lat.csc.fi/ds/annex/runLoader?nodeid=MPI7571%23&time=32725&duration=7529&tiername=RJ-original)
+- Rare features and dialectal lexicon a challenging combination
+
+More realistic workflow:
+
+- Explore
+- Visualize
+- Explore
+- Visualize
+- Find more coarsely what you want, categorize manually
+- Fix your morphological analysator
+- Fix your dependency parser
+- …
 
 ## Current situation
 
