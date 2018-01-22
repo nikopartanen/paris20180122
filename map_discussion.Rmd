@@ -33,6 +33,14 @@ library(lingtypology)
 library(tidyverse)
 library(leaflet)
 
+map.feature(ejective_and_n_consonants$language,
+            features = ejective_and_n_consonants$ejectives,
+            label = ejective_and_n_consonants$language)
+
+```
+
+
+```{r}
 uralic <- lingtypology::lang.aff("Uralic")
 wals_85A <- wals.feature("85A")
 wals_85A_scandinavia <- wals_85A %>% filter(language %in% c("Finnish", "Russian", "Swedish"))
@@ -44,17 +52,8 @@ map.feature(languages = wals_85A_scandinavia$language,
 
 ```
 
+
 ## Extends to linguistic area maps
-
-```{r}
-map.feature(ejective_and_n_consonants$language,
-            features = ejective_and_n_consonants$ejectives,
-            label = ejective_and_n_consonants$language)
-
-map.feature(circassian$language, features = circassian$dialect,
-            latitude = circassian$latitude, 
-            longitude = circassian$longitude)
-```
 
 ![](https://imgur.com/rkrIXGE.png)
 
@@ -221,6 +220,11 @@ Structure here:
 names(skn)
 ```
 
+```{r}
+head(skn %>% arrange(position) %>% slice(1:10))
+```
+
+
 
 ```{r}
 
@@ -232,7 +236,12 @@ leaflet() %>%
   addMinicharts(lng = skn_kanssa$lon,
                 lat = skn_kanssa$lat,
                 type = "pie", width = 20,
-                chartdata = skn_kanssa[, c("pre", "post")])
+                chartdata = skn_kanssa[, c("pre", "post")]) %>%
+  map.feature(pipe.data = ., 
+              languages = wals_85A_scandinavia$language,
+              features = wals_85A_scandinavia$`85A`,
+              label = wals_85A_scandinavia$language,
+              shape = c("➡", "⬅"))
 
 ```
 
